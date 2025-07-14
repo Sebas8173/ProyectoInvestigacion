@@ -7,6 +7,8 @@ app.secret_key = 'supersecretkey'  # Vulnerabilidad: Clave hardcodeada
 # Ruta para login
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    GITHUB_TOKEN = "ghp_fake123456789012345678901234567890123456"
+
     """Maneja el inicio de sesión de bibliotecarios."""
     if request.method == 'POST':
         username = request.form['username']
