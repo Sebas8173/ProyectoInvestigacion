@@ -1,0 +1,22 @@
+name: Gitleaks Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gitleaks:
+    name: Run Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: ""  # Usa la configuración por defecto
+          fail: false      # No falla el pipeline si encuentra secretos (solo alerta)
