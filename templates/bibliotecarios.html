@@ -2,49 +2,81 @@
 {% block title %}Gestión de Bibliotecarios{% endblock %}
 {% block content %}
 <div class="container">
-    <h2>Gestión de Bibliotecarios</h2>
-    <button onclick="openModal('addBibliotecarioModal')">Agregar Bibliotecario</button>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>Nombre</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for bibliotecario in bibliotecarios %}
-            <!-- Vulnerabilidad: XSS posible al no sanitizar bibliotecario[1], bibliotecario[3] -->
-            <tr>
-                <td>{{ bibliotecario[0] }}</td>
-                <td>{{ bibliotecario[1] }}</td>
-                <td>{{ bibliotecario[3] }}</td>
-                <td>
-                    <button onclick="openEditModal({{ bibliotecario[0] }}, '{{ bibliotecario[1] }}', '{{ bibliotecario[3] }}')">Editar</button>
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="id" value="{{ bibliotecario[0] }}">
-                        <button type="submit" name="delete">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card">
+        <h2><i class="fas fa-users-cog"></i> Gestión de Bibliotecarios - BiblioDesk</h2>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="btn-primary" onclick="openModal('addBibliotecarioModal')">
+                <i class="fas fa-plus"></i> Agregar Bibliotecario
+            </button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="fas fa-user"></i> Usuario</th>
+                        <th><i class="fas fa-id-card"></i> Nombre</th>
+                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bibliotecario in bibliotecarios %}
+                    <!-- Vulnerabilidad: XSS posible al no sanitizar bibliotecario[1], bibliotecario[3] -->
+                    <tr>
+                        <td><strong>{{ bibliotecario[0] }}</strong></td>
+                        <td>{{ bibliotecario[1] }}</td>
+                        <td>{{ bibliotecario[3] }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-primary" onclick="openEditModal('{{ bibliotecario[0] }}', '{{ bibliotecario[1] }}', '{{ bibliotecario[3] }}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="id" value="{{ bibliotecario[0] }}">
+                                    <button type="submit" name="delete" class="btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este bibliotecario?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not bibliotecarios %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-users-cog"></i> No hay bibliotecarios registrados. ¡Agrega el primero!
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Modal para agregar bibliotecario -->
     <div id="addBibliotecarioModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('addBibliotecarioModal')">×</span>
-            <h3>Agregar Bibliotecario</h3>
+            <span class="close" onclick="closeModal('addBibliotecarioModal')">&times;</span>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-plus-circle"></i> Agregar Bibliotecario
+            </h3>
             <form method="POST">
-                <label for="username">Usuario:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="password">Contraseña:</label>
-                <input type="text" id="password" name="password" required> <!-- Vulnerabilidad: Contraseña visible -->
-                <label for="name">Nombre:</label>
-                <input type="text" id="name" name="name" required>
-                <button type="submit" name="add">Agregar</button>
+                <div>
+                    <label for="username"><i class="fas fa-user"></i> Usuario:</label>
+                    <input type="text" id="username" name="username" required placeholder="Nombre de usuario">
+                </div>
+                <div>
+                    <label for="password"><i class="fas fa-lock"></i> Contraseña:</label>
+                    <input type="text" id="password" name="password" required placeholder="Contraseña"> <!-- Vulnerabilidad: Contraseña visible -->
+                </div>
+                <div>
+                    <label for="name"><i class="fas fa-id-card"></i> Nombre:</label>
+                    <input type="text" id="name" name="name" required placeholder="Nombre completo">
+                </div>
+                <button type="submit" name="add" class="btn-success">
+                    <i class="fas fa-check"></i> Agregar
+                </button>
             </form>
         </div>
     </div>
@@ -52,17 +84,27 @@
     <!-- Modal para editar bibliotecario -->
     <div id="editBibliotecarioModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('editBibliotecarioModal')">×</span>
-            <h3>Editar Bibliotecario</h3>
+            <span class="close" onclick="closeModal('editBibliotecarioModal')">&times;</span>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-edit"></i> Editar Bibliotecario
+            </h3>
             <form method="POST">
                 <input type="hidden" id="edit_id" name="id">
-                <label for="edit_username">Usuario:</label>
-                <input type="text" id="edit_username" name="username" required>
-                <label for="edit_password">Contraseña:</label>
-                <input type="text" id="edit_password" name="password" required>
-                <label for="edit_name">Nombre:</label>
-                <input type="text" id="edit_name" name="name" required>
-                <button type="submit" name="update">Actualizar</button>
+                <div>
+                    <label for="edit_username"><i class="fas fa-user"></i> Usuario:</label>
+                    <input type="text" id="edit_username" name="username" required placeholder="Nombre de usuario">
+                </div>
+                <div>
+                    <label for="edit_password"><i class="fas fa-lock"></i> Contraseña:</label>
+                    <input type="text" id="edit_password" name="password" required placeholder="Nueva contraseña">
+                </div>
+                <div>
+                    <label for="edit_name"><i class="fas fa-id-card"></i> Nombre:</label>
+                    <input type="text" id="edit_name" name="name" required placeholder="Nombre completo">
+                </div>
+                <button type="submit" name="update" class="btn-primary">
+                    <i class="fas fa-save"></i> Actualizar
+                </button>
             </form>
         </div>
     </div>

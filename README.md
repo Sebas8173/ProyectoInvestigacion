@@ -1,8 +1,8 @@
-# Sistema CRUD de Biblioteca
+# BiblioDesk - Sistema CRUD de Biblioteca
 
 ## Descripción
 
-Sistema CRUD (Crear, Leer, Actualizar, Eliminar) para gestionar una biblioteca, desarrollado con Python 3.9+, Flask 2.0.1 y SQLite. Permite a bibliotecarios iniciar sesión y administrar libros, autores, préstamos y cuentas de bibliotecarios a través de una interfaz web minimalista con formularios modales. Incluye vulnerabilidades intencionales (inyección SQL, XSS, contraseñas en texto plano, falta de CSRF) para fines educativos. **Advertencia**: No usar en producción debido a estas vulnerabilidades.
+BiblioDesk es un sistema CRUD (Crear, Leer, Actualizar, Eliminar) para gestionar una biblioteca, desarrollado con Python 3.9+, Flask 2.0.1 y SQLite. Permite a bibliotecarios iniciar sesión y administrar libros, autores, préstamos y cuentas de bibliotecarios a través de una interfaz web moderna con formularios modales y un diseño elegante en tonos azules. Incluye vulnerabilidades intencionales (inyección SQL, XSS, contraseñas en texto plano, falta de CSRF) para fines educativos. **Advertencia**: No usar en producción debido a estas vulnerabilidades.
 
 ## Requisitos
 
@@ -36,6 +36,14 @@ Sistema CRUD (Crear, Leer, Actualizar, Eliminar) para gestionar una biblioteca, 
    ```
 5. Accede a `http://localhost:5000` en un navegador. Usa las credenciales `admin`/`password` para iniciar sesión (bibliotecario por defecto).
 
+## Características del Diseño
+
+- **Interfaz Moderna**: Diseño elegante con paleta de azules y celestes pasteles
+- **Logo Corporativo**: Logo integrado en el header con el nombre BiblioDesk
+- **Iconos Profesionales**: Utiliza Font Awesome 6.7.1 para iconos consistentes
+- **Responsive Design**: Adaptable a dispositivos móviles y tablets
+- **Efectos Visuales**: Animaciones suaves y transiciones elegantes
+
 ## Estructura del Proyecto
 
 - `app.py`: Lógica principal de Flask, rutas CRUD y login.
@@ -63,6 +71,9 @@ Sistema CRUD (Crear, Leer, Actualizar, Eliminar) para gestionar una biblioteca, 
 ## Notas
 
 - Usa Visual Studio Code para editar y ejecutar el proyecto.
-- La interfaz utiliza formularios modales para una experiencia moderna.
+- BiblioDesk utiliza una interfaz moderna con formularios modales y diseño responsive.
+- El logo corporativo está integrado en el header y página de login.
+- Utiliza Font Awesome 6.7.1 para iconos profesionales y consistentes.
+- La paleta de colores en azules y celestes pasteles proporciona una experiencia visual elegante.
 - Corrige las vulnerabilidades antes de usar en producción (consultas parametrizadas, sanitización, CSRF, etc.).
 - Las secciones de autores y préstamos son funcionalidades adicionales para demostrar más vulnerabilidades.

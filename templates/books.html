@@ -2,64 +2,107 @@
 {% block title %}Gestión de Libros{% endblock %}
 {% block content %}
 <div class="container">
-    <h2>Gestión de Libros</h2>
-    <button onclick="openModal('addBookModal')">Agregar Libro</button>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Año</th>
-                <th>Resumen</th>
-                <th>Editorial</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for book in books %}
-            <!-- Vulnerabilidad: XSS posible al no sanitizar book[1], book[4], book[5] -->
-            <tr>
-                <td>{{ book[0] }}</td>
-                <td>{{ book[1] }}</td>
-                <td>{{ book[2] }}</td>
-                <td>{{ book[3] }}</td>
-                <td>{{ book[4] }}</td>
-                <td>{{ book[5] }}</td>
-                <td>
-                    <button onclick="openEditModal({{ book[0] }}, '{{ book[1] }}', {{ book[3] }}, '{{ book[4] }}', '{{ book[5] }}')">Editar</button>
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="id" value="{{ book[0] }}">
-                        <button type="submit" name="delete">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card">
+        <h2><i class="fas fa-book"></i> Gestión de Libros - BiblioDesk</h2>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="btn-primary" onclick="openModal('addBookModal')">
+                <i class="fas fa-plus"></i> Agregar Nuevo Libro
+            </button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="fas fa-book-open"></i> Título</th>
+                        <th><i class="fas fa-user"></i> Autor</th>
+                        <th><i class="fas fa-calendar"></i> Año</th>
+                        <th><i class="fas fa-file-alt"></i> Resumen</th>
+                        <th><i class="fas fa-building"></i> Editorial</th>
+                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <!-- Vulnerabilidad: XSS posible al no sanitizar book[1], book[4], book[5] -->
+                    <tr>
+                        <td><strong>{{ book[0] }}</strong></td>
+                        <td><strong>{{ book[1] }}</strong></td>
+                        <td>{{ book[2] }}</td>
+                        <td>{{ book[3] if book[3] else '?' }}</td>
+                        <td>
+                            {% if book[4] and book[4]|length > 50 %}
+                                {{ book[4][:50] }}...
+                            {% else %}
+                                {{ book[4] if book[4] else 'Sin resumen' }}
+                            {% endif %}
+                        </td>
+                        <td>{{ book[5] if book[5] else 'No especificada' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-primary" onclick="openEditModal('{{ book[0] }}', '{{ book[1] }}', '{{ book[3] }}', '{{ book[4] }}', '{{ book[5] }}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="id" value="{{ book[0] }}">
+                                    <button type="submit" name="delete" class="btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este libro?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not books %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-book"></i> No hay libros registrados. ¡Agrega el primero!
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Modal para agregar libro -->
     <!-- Vulnerabilidad: Sin token CSRF -->
     <div id="addBookModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('addBookModal')">&times;</span>
-            <h3>Agregar Libro</h3>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-plus-circle"></i> Agregar Nuevo Libro
+            </h3>
             <form method="POST">
-                <label for="title">Título:</label>
-                <input type="text" id="title" name="title" required>
-                <label for="author_id">Autor:</label>
-                <select id="author_id" name="author_id" required>
-                    {% for author in authors %}
-                    <option value="{{ author[0] }}">{{ author[1] }}</option>
-                    {% endfor %}
-                </select>
-                <label for="publication_year">Año de Publicación:</label>
-                <input type="number" id="publication_year" name="publication_year">
-                <label for="summary">Resumen:</label>
-                <textarea id="summary" name="summary"></textarea>
-                <label for="publisher">Editorial:</label>
-                <input type="text" id="publisher" name="publisher">
-                <button type="submit" name="add">Agregar</button>
+                <div>
+                    <label for="title"><i class="fas fa-book-open"></i> Título del libro:</label>
+                    <input type="text" id="title" name="title" required placeholder="Ingresa el título del libro">
+                </div>
+                <div>
+                    <label for="author_id"><i class="fas fa-user"></i> Autor:</label>
+                    <select id="author_id" name="author_id" required>
+                        <option value="">Selecciona un autor</option>
+                        {% for author in authors %}
+                        <option value="{{ author[0] }}">{{ author[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="publication_year"><i class="fas fa-calendar"></i> Año de Publicación:</label>
+                    <input type="number" id="publication_year" name="publication_year" min="1000" max="2030" placeholder="Ej: 2023">
+                </div>
+                <div>
+                    <label for="summary"><i class="fas fa-file-alt"></i> Resumen:</label>
+                    <textarea id="summary" name="summary" placeholder="Escribe un breve resumen del libro..."></textarea>
+                </div>
+                <div>
+                    <label for="publisher"><i class="fas fa-building"></i> Editorial:</label>
+                    <input type="text" id="publisher" name="publisher" placeholder="Nombre de la editorial">
+                </div>
+                <button type="submit" name="add" class="btn-success">
+                    <i class="fas fa-check"></i> Agregar Libro
+                </button>
             </form>
         </div>
     </div>
@@ -68,24 +111,38 @@
     <div id="editBookModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('editBookModal')">&times;</span>
-            <h3>Editar Libro</h3>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-edit"></i> Editar Libro
+            </h3>
             <form method="POST">
                 <input type="hidden" id="edit_id" name="id">
-                <label for="edit_title">Título:</label>
-                <input type="text" id="edit_title" name="title" required>
-                <label for="edit_author_id">Autor:</label>
-                <select id="edit_author_id" name="author_id" required>
-                    {% for author in authors %}
-                    <option value="{{ author[0] }}">{{ author[1] }}</option>
-                    {% endfor %}
-                </select>
-                <label for="edit_publication_year">Año de Publicación:</label>
-                <input type="number" id="edit_publication_year" name="publication_year">
-                <label for="edit_summary">Resumen:</label>
-                <textarea id="edit_summary" name="summary"></textarea>
-                <label for="edit_publisher">Editorial:</label>
-                <input type="text" id="edit_publisher" name="publisher">
-                <button type="submit" name="update">Actualizar</button>
+                <div>
+                    <label for="edit_title"><i class="fas fa-book-open"></i> Título del libro:</label>
+                    <input type="text" id="edit_title" name="title" required placeholder="Ingresa el título del libro">
+                </div>
+                <div>
+                    <label for="edit_author_id"><i class="fas fa-user"></i> Autor:</label>
+                    <select id="edit_author_id" name="author_id" required>
+                        {% for author in authors %}
+                        <option value="{{ author[0] }}">{{ author[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="edit_publication_year"><i class="fas fa-calendar"></i> Año de Publicación:</label>
+                    <input type="number" id="edit_publication_year" name="publication_year" min="1000" max="2030" placeholder="Ej: 2023">
+                </div>
+                <div>
+                    <label for="edit_summary"><i class="fas fa-file-alt"></i> Resumen:</label>
+                    <textarea id="edit_summary" name="summary" placeholder="Escribe un breve resumen del libro..."></textarea>
+                </div>
+                <div>
+                    <label for="edit_publisher"><i class="fas fa-building"></i> Editorial:</label>
+                    <input type="text" id="edit_publisher" name="publisher" placeholder="Nombre de la editorial">
+                </div>
+                <button type="submit" name="update" class="btn-primary">
+                    <i class="fas fa-save"></i> Actualizar Libro
+                </button>
             </form>
         </div>
     </div>
@@ -94,9 +151,13 @@
 function openEditModal(id, title, publication_year, summary, publisher) {
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_title').value = title;
-    document.getElementById('edit_publication_year').value = publication_year;
-    document.getElementById('edit_summary').value = summary;
-    document.getElementById('edit_publisher').value = publisher;
+    document.getElementById('edit_publication_year').value = publication_year || '';
+    document.getElementById('edit_summary').value = summary || '';
+    document.getElementById('edit_publisher').value = publisher || '';
+    
+    // Seleccionar el autor correcto - necesitamos obtener el author_id del libro
+    // Por ahora dejamos que se seleccione manualmente
+    
     document.getElementById('editBookModal').style.display = 'block';
 }
 </script>

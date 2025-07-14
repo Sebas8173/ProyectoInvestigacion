@@ -1,18 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<div class="container">
-    <h2>Iniciar Sesión</h2>
-    {% if error %}
-    <p class="error">{{ error }}</p>
-    {% endif %}
-    <!-- Vulnerabilidad: Sin token CSRF -->
-    <form method="POST">
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Iniciar Sesión</button>
-    </form>
+<div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div class="card" style="max-width: 450px; width: 100%; text-align: center;">
+        <div style="margin-bottom: 2rem;">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BiblioDesk Logo" class="login-logo">
+            <h2 style="margin-bottom: 2rem;"><i class="fas fa-lock"></i> Iniciar Sesión en BiblioDesk</h2>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">
+                Ingresa tus credenciales para acceder al sistema de gestión bibliotecaria
+            </p>
+        </div>
+        
+        {% if error %}
+        <div class="error" style="margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <!-- Vulnerabilidad: Sin token CSRF -->
+        <form method="POST" style="max-width: none; background: none; padding: 0; box-shadow: none;">
+            <div style="margin-bottom: 1.5rem;">
+                <label for="username"><i class="fas fa-user"></i> Usuario:</label>
+                <input type="text" id="username" name="username" required placeholder="Ingresa tu nombre de usuario" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <label for="password"><i class="fas fa-lock"></i> Contraseña:</label>
+                <input type="password" id="password" name="password" required placeholder="Ingresa tu contraseña" style="width: 100%;">
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </form>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-light);">
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">
+                <i class="fas fa-lightbulb"></i> Credenciales de prueba:
+            </p>
+            <div style="background: var(--light-blue); padding: 1rem; border-radius: 10px; font-size: 0.9rem;">
+                <strong>Usuario:</strong> admin<br>
+                <strong>Contraseña:</strong> password
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus automático en el campo de usuario
+    document.getElementById('username').focus();
+    
+    // Efecto de entrada suave para el card
+    const card = document.querySelector('.card');
+    card.style.transform = 'translateY(20px)';
+    card.style.opacity = '0';
+    setTimeout(() => {
+        card.style.transition = 'all 0.5s ease';
+        card.style.transform = 'translateY(0)';
+        card.style.opacity = '1';
+    }, 200);
+});
+</script>
 {% endblock %}

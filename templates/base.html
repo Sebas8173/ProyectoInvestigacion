@@ -3,26 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca - {% block title %}{% endblock %}</title>
+    <title>BiblioDesk - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
 </head>
 <body>
     <header>
-        <h1>Sistema de Biblioteca</h1>
-        {% if session.logged_in %}
-        <nav>
-            <a href="{{ url_for('books') }}">Libros</a>
-            <a href="{{ url_for('authors') }}">Autores</a>
-            <a href="{{ url_for('loans') }}">Préstamos</a>
-            <a href="{{ url_for('bibliotecarios') }}">Bibliotecarios</a>
-            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-        </nav>
-        {% endif %}
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BiblioDesk Logo" class="logo">
+            </div>
+            {% if session.logged_in %}
+            <nav>
+                <a href="{{ url_for('books') }}"><i class="fas fa-book"></i> Libros</a>
+                <a href="{{ url_for('authors') }}"><i class="fas fa-user-edit"></i> Autores</a>
+                <a href="{{ url_for('loans') }}"><i class="fas fa-clipboard-list"></i> Préstamos</a>
+                <a href="{{ url_for('bibliotecarios') }}"><i class="fas fa-users-cog"></i> Bibliotecarios</a>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </nav>
+            <p style="text-align: center; margin-top: 1rem; opacity: 0.9; font-size: 0.95rem;">
+                <i class="fas fa-user-circle"></i> Bienvenido, <strong>{{ session.name or session.username }}</strong>
+            </p>
+            {% endif %}
+        </div>
     </header>
     <main>
         {% block content %}
         {% endblock %}
     </main>
+    
+    {% if session.logged_in %}
+    <footer style="text-align: center; padding: 2rem; color: var(--text-light); background: var(--white); margin-top: 3rem; box-shadow: 0 -4px 20px var(--shadow);">
+        <p><i class="fas fa-lightbulb"></i> BiblioDesk - Sistema de Gestión Bibliotecaria | <i class="fas fa-code"></i> Desarrollado por Moisés Benalcázar & Stefany Díaz</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;"><i class="fas fa-exclamation-triangle"></i> Versión educativa - Contiene vulnerabilidades intencionales</p>
+    </footer>
+    {% endif %}
+    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <!-- Script para mejorar la UX -->
+    <script>
+        // Añadir efectos visuales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de carga suave
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // Mejorar la experiencia de los modales
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Añadir confirmación para botones de eliminar
+            const deleteButtons = document.querySelectorAll('button[name="delete"]');
+            deleteButtons.forEach(button => {
+                if (!button.onclick) {
+                    button.onclick = function() {
+                        return confirm('¿Estás seguro de que deseas eliminar este elemento?');
+                    };
+                }
+            });
+        });
+        
+        // Funciones globales para modales
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                // Focus en el primer input
+                const firstInput = modal.querySelector('input[type="text"], input[type="email"], textarea');
+                if (firstInput) {
+                    setTimeout(() => firstInput.focus(), 300);
+                }
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal[style*="flex"]');
+                if (openModal) {
+                    openModal.style.display = 'none';
+                }
+            }
+        });
+        
+        // Precargar logo para mejor experiencia
+        const logoPreload = new Image();
+        logoPreload.src = "{{ url_for('static', filename='img/logo.png') }}";
+    </script>
 </body>
 </html>

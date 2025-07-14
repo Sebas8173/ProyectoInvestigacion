@@ -2,47 +2,77 @@
 {% block title %}Gestión de Autores{% endblock %}
 {% block content %}
 <div class="container">
-    <h2>Gestión de Autores</h2>
-    <button onclick="openModal('addAuthorModal')">Agregar Autor</button>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Nacionalidad</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for author in authors %}
-            <!-- Vulnerabilidad: XSS posible al no sanitizar author[1], author[2] -->
-            <tr>
-                <td>{{ author[0] }}</td>
-                <td>{{ author[1] }}</td>
-                <td>{{ author[2] }}</td>
-                <td>
-                    <button onclick="openEditModal({{ author[0] }}, '{{ author[1] }}', '{{ author[2] }}')">Editar</button>
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="id" value="{{ author[0] }}">
-                        <button type="submit" name="delete">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card">
+        <h2><i class="fas fa-user-edit"></i> Gestión de Autores - BiblioDesk</h2>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="btn-primary" onclick="openModal('addAuthorModal')">
+                <i class="fas fa-plus"></i> Agregar Nuevo Autor
+            </button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="fas fa-user"></i> Nombre</th>
+                        <th><i class="fas fa-globe"></i> Nacionalidad</th>
+                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for author in authors %}
+                    <!-- Vulnerabilidad: XSS posible al no sanitizar author[1], author[2] -->
+                    <tr>
+                        <td><strong>{{ author[0] }}</strong></td>
+                        <td>{{ author[1] }}</td>
+                        <td>{{ author[2] if author[2] else 'No especificada' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-primary" onclick="openEditModal('{{ author[0] }}', '{{ author[1] }}', '{{ author[2] }}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="id" value="{{ author[0] }}">
+                                    <button type="submit" name="delete" class="btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este autor?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not authors %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-book-open"></i> No hay autores registrados. ¡Agrega el primero!
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Modal para agregar autor -->
     <div id="addAuthorModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('addAuthorModal')">&times;</span>
-            <h3>Agregar Autor</h3>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-plus-circle"></i> Agregar Nuevo Autor
+            </h3>
             <form method="POST">
-                <label for="name">Nombre:</label>
-                <input type="text" id="name" name="name" required>
-                <label for="nationality">Nacionalidad:</label>
-                <input type="text" id="nationality" name="nationality">
-                <button type="submit" name="add">Agregar</button>
+                <div>
+                    <label for="name"><i class="fas fa-user"></i> Nombre completo:</label>
+                    <input type="text" id="name" name="name" required placeholder="Ingresa el nombre del autor">
+                </div>
+                <div>
+                    <label for="nationality"><i class="fas fa-globe"></i> Nacionalidad:</label>
+                    <input type="text" id="nationality" name="nationality" placeholder="Ej: Colombiano, Argentino, etc.">
+                </div>
+                <button type="submit" name="add" class="btn-success">
+                    <i class="fas fa-check"></i> Agregar Autor
+                </button>
             </form>
         </div>
     </div>
@@ -51,14 +81,22 @@
     <div id="editAuthorModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('editAuthorModal')">&times;</span>
-            <h3>Editar Autor</h3>
+            <h3 style="color: var(--accent-blue); margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-edit"></i> Editar Autor
+            </h3>
             <form method="POST">
                 <input type="hidden" id="edit_id" name="id">
-                <label for="edit_name">Nombre:</label>
-                <input type="text" id="edit_name" name="name" required>
-                <label for="edit_nationality">Nacionalidad:</label>
-                <input type="text" id="edit_nationality" name="nationality">
-                <button type="submit" name="update">Actualizar</button>
+                <div>
+                    <label for="edit_name"><i class="fas fa-user"></i> Nombre completo:</label>
+                    <input type="text" id="edit_name" name="name" required placeholder="Ingresa el nombre del autor">
+                </div>
+                <div>
+                    <label for="edit_nationality"><i class="fas fa-globe"></i> Nacionalidad:</label>
+                    <input type="text" id="edit_nationality" name="nationality" placeholder="Ej: Colombiano, Argentino, etc.">
+                </div>
+                <button type="submit" name="update" class="btn-primary">
+                    <i class="fas fa-save"></i> Actualizar Autor
+                </button>
             </form>
         </div>
     </div>
@@ -67,7 +105,7 @@
 function openEditModal(id, name, nationality) {
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_name').value = name;
-    document.getElementById('edit_nationality').value = nationality;
+    document.getElementById('edit_nationality').value = nationality || '';
     document.getElementById('editAuthorModal').style.display = 'block';
 }
 </script>
