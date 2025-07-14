@@ -15,6 +15,6 @@ jobs:
 
       - name: Install & run Gitleaks
         run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 --output gitleaks
           chmod +x gitleaks
           ./gitleaks detect --no-banner --report-path gitleaks-report.sarif || true
