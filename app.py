@@ -2,18 +2,21 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import database
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # Clave para sesiones (vulnerabilidad: hardcodeada)
+app.secret_key = 'supersecretkey'  # Vulnerabilidad: Clave hardcodeada
 
 # Ruta para login
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    """Maneja el inicio de sesión básico."""
+    """Maneja el inicio de sesión de bibliotecarios."""
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Vulnerabilidad: Credenciales hardcodeadas y sin hash
-        if username == 'admin' and password == 'password':
+        # Vulnerabilidad: Verificación insegura con inyección SQL posible
+        bibliotecario = database.check_bibliotecario(username, password)
+        if bibliotecario:
             session['logged_in'] = True
+            session['username'] = bibliotecario[1]  # Almacena el username
+            session['name'] = bibliotecario[3]  # Almacena el nombre
             return redirect(url_for('books'))
         else:
             return render_template('login.html', error='Credenciales inválidas')
@@ -24,6 +27,8 @@ def login():
 def logout():
     """Cierra la sesión del usuario."""
     session.pop('logged_in', None)
+    session.pop('username', None)
+    session.pop('name', None)
     return redirect(url_for('login'))
 
 # Ruta para listar y gestionar libros
@@ -40,7 +45,6 @@ def books():
             publication_year = request.form['publication_year']
             summary = request.form['summary']
             publisher = request.form['publisher']
-            # Vulnerabilidad: Inyección SQL posible
             database.add_book(title, author_id, publication_year, summary, publisher)
         elif 'update' in request.form:
             id = request.form['id']
@@ -110,6 +114,32 @@ def loans():
     loans = database.get_loans()
     books = database.get_books()
     return render_template('loans.html', loans=loans, books=books)
+
+# Ruta para listar y gestionar bibliotecarios
+@app.route('/bibliotecarios', methods=['GET', 'POST'])
+def bibliotecarios():
+    """Gestiona la lista de bibliotecarios y operaciones CRUD."""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        if 'add' in request.form:
+            username = request.form['username']
+            password = request.form['password']
+            name = request.form['name']
+            database.add_bibliotecario(username, password, name)
+        elif 'update' in request.form:
+            id = request.form['id']
+            username = request.form['username']
+            password = request.form['password']
+            name = request.form['name']
+            database.update_bibliotecario(id, username, password, name)
+        elif 'delete' in request.form:
+            id = request.form['id']
+            database.delete_bibliotecario(id)
+    
+    bibliotecarios = database.get_bibliotecarios()
+    return render_template('bibliotecarios.html', bibliotecarios=bibliotecarios)
 
 if __name__ == '__main__':
     database.init_db()

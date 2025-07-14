@@ -26,6 +26,14 @@ def init_db():
         return_date TEXT,
         FOREIGN KEY (book_id) REFERENCES books(id)
     )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS bibliotecarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,  -- Vulnerabilidad: Contraseña en texto plano
+        name TEXT NOT NULL
+    )''')
+    # Insertar un bibliotecario por defecto
+    c.execute("INSERT OR IGNORE INTO bibliotecarios (username, password, name) VALUES ('admin', 'password', 'Administrador')")
     conn.commit()
     conn.close()
 
@@ -33,7 +41,6 @@ def get_books():
     """Obtiene todos los libros con sus autores."""
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
-    # Vulnerabilidad: Posible exposición de datos sensibles en errores
     c.execute('SELECT books.id, books.title, authors.name, books.publication_year, books.summary, books.publisher FROM books JOIN authors ON books.author_id = authors.id')
     books = c.fetchall()
     conn.close()
@@ -57,11 +64,20 @@ def get_loans():
     conn.close()
     return loans
 
+def get_bibliotecarios():
+    """Obtiene todos los bibliotecarios."""
+    conn = sqlite3.connect('library.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM bibliotecarios')
+    bibliotecarios = c.fetchall()
+    conn.close()
+    return bibliotecarios
+
 def add_book(title, author_id, publication_year, summary, publisher):
     """Agrega un nuevo libro."""
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
-    # Vulnerabilidad: Inyección SQL (concatenación de cadenas)
+    # Vulnerabilidad: Inyección SQL
     c.execute(f"INSERT INTO books (title, author_id, publication_year, summary, publisher) VALUES ('{title}', {author_id}, {publication_year}, '{summary}', '{publisher}')")
     conn.commit()
     conn.close()
@@ -137,3 +153,40 @@ def delete_loan(id):
     c.execute(f"DELETE FROM loans WHERE id={id}")
     conn.commit()
     conn.close()
+
+def add_bibliotecario(username, password, name):
+    """Agrega un nuevo bibliotecario."""
+    conn = sqlite3.connect('library.db')
+    c = conn.cursor()
+    # Vulnerabilidad: Inyección SQL y contraseña en texto plano
+    c.execute(f"INSERT INTO bibliotecarios (username, password, name) VALUES ('{username}', '{password}', '{name}')")
+    conn.commit()
+    conn.close()
+
+def update_bibliotecario(id, username, password, name):
+    """Actualiza un bibliotecario existente."""
+    conn = sqlite3.connect('library.db')
+    c = conn.cursor()
+    # Vulnerabilidad: Inyección SQL
+    c.execute(f"UPDATE bibliotecarios SET username='{username}', password='{password}', name='{name}' WHERE id={id}")
+    conn.commit()
+    conn.close()
+
+def delete_bibliotecario(id):
+    """Elimina un bibliotecario."""
+    conn = sqlite3.connect('library.db')
+    c = conn.cursor()
+    # Vulnerabilidad: Inyección SQL
+    c.execute(f"DELETE FROM bibliotecarios WHERE id={id}")
+    conn.commit()
+    conn.close()
+
+def check_bibliotecario(username, password):
+    """Verifica las credenciales de un bibliotecario."""
+    conn = sqlite3.connect('library.db')
+    c = conn.cursor()
+    # Vulnerabilidad: Inyección SQL
+    c.execute(f"SELECT * FROM bibliotecarios WHERE username='{username}' AND password='{password}'")
+    bibliotecario = c.fetchone()
+    conn.close()
+    return bibliotecario

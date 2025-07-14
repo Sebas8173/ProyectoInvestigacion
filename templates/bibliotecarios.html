@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Bibliotecarios{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Gestión de Bibliotecarios</h2>
+    <button onclick="openModal('addBibliotecarioModal')">Agregar Bibliotecario</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bibliotecario in bibliotecarios %}
+            <!-- Vulnerabilidad: XSS posible al no sanitizar bibliotecario[1], bibliotecario[3] -->
+            <tr>
+                <td>{{ bibliotecario[0] }}</td>
+                <td>{{ bibliotecario[1] }}</td>
+                <td>{{ bibliotecario[3] }}</td>
+                <td>
+                    <button onclick="openEditModal({{ bibliotecario[0] }}, '{{ bibliotecario[1] }}', '{{ bibliotecario[3] }}')">Editar</button>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="id" value="{{ bibliotecario[0] }}">
+                        <button type="submit" name="delete">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal para agregar bibliotecario -->
+    <div id="addBibliotecarioModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addBibliotecarioModal')">×</span>
+            <h3>Agregar Bibliotecario</h3>
+            <form method="POST">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Contraseña:</label>
+                <input type="text" id="password" name="password" required> <!-- Vulnerabilidad: Contraseña visible -->
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" name="name" required>
+                <button type="submit" name="add">Agregar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para editar bibliotecario -->
+    <div id="editBibliotecarioModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editBibliotecarioModal')">×</span>
+            <h3>Editar Bibliotecario</h3>
+            <form method="POST">
+                <input type="hidden" id="edit_id" name="id">
+                <label for="edit_username">Usuario:</label>
+                <input type="text" id="edit_username" name="username" required>
+                <label for="edit_password">Contraseña:</label>
+                <input type="text" id="edit_password" name="password" required>
+                <label for="edit_name">Nombre:</label>
+                <input type="text" id="edit_name" name="name" required>
+                <button type="submit" name="update">Actualizar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+function openEditModal(id, username, name) {
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_username').value = username;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('editBibliotecarioModal').style.display = 'block';
+}
+</script>
+{% endblock %}
