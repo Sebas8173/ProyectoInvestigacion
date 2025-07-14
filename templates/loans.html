@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Préstamos{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Gestión de Préstamos</h2>
+    <button onclick="openModal('addLoanModal')">Agregar Préstamo</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Libro</th>
+                <th>Usuario</th>
+                <th>Fecha de Préstamo</th>
+                <th>Fecha de Devolución</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for loan in loans %}
+            <!-- Vulnerabilidad: XSS posible al no sanitizar loan[1], loan[2] -->
+            <tr>
+                <td>{{ loan[0] }}</td>
+                <td>{{ loan[1] }}</td>
+                <td>{{ loan[2] }}</td>
+                <td>{{ loan[3] }}</td>
+                <td>{{ loan[4] }}</td>
+                <td>
+                    <button onclick="openEditModal({{ loan[0] }}, '{{ loan[1] }}', '{{ loan[2] }}', '{{ loan[3] }}', '{{ loan[4] }}')">Editar</button>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="id" value="{{ loan[0] }}">
+                        <button type="submit" name="delete">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal para agregar préstamo -->
+    <div id="addLoanModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addLoanModal')">&times;</span>
+            <h3>Agregar Préstamo</h3>
+            <form method="POST">
+                <label for="book_id">Libro:</label>
+                <select id="book_id" name="book_id" required>
+                    {% for book in books %}
+                    <option value="{{ book[0] }}">{{ book[1] }}</option>
+                    {% endfor %}
+                </select>
+                <label for="user_name">Usuario:</label>
+                <input type="text" id="user_name" name="user_name" required>
+                <label for="loan_date">Fecha de Préstamo:</label>
+                <input type="date" id="loan_date" name="loan_date" required>
+                <label for="return_date">Fecha de Devolución:</label>
+                <input type="date" id="return_date" name="return_date">
+                <button type="submit" name="add">Agregar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para editar préstamo -->
+    <div id="editLoanModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editLoanModal')">&times;</span>
+            <h3>Editar Préstamo</h3>
+            <form method="POST">
+                <input type="hidden" id="edit_id" name="id">
+                <label for="edit_book_id">Libro:</label>
+                <select id="edit_book_id" name="book_id" required>
+                    {% for book in books %}
+                    <option value="{{ book[0] }}">{{ book[1] }}</option>
+                    {% endfor %}
+                </select>
+                <label for="edit_user_name">Usuario:</label>
+                <input type="text" id="edit_user_name" name="user_name" required>
+                <label for="edit_loan_date">Fecha de Préstamo:</label>
+                <input type="date" id="edit_loan_date" name="loan_date" required>
+                <label for="edit_return_date">Fecha de Devolución:</label>
+                <input type="date" id="edit_return_date" name="return_date">
+                <button type="submit" name="update">Actualizar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+function openEditModal(id, book_title, user_name, loan_date, return_date) {
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_user_name').value = user_name;
+    document.getElementById('edit_loan_date').value = loan_date;
+    document.getElementById('edit_return_date').value = return_date;
+    document.getElementById('editLoanModal').style.display = 'block';
+}
+</script>
+{% endblock %}
