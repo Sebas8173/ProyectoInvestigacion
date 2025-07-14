@@ -9,12 +9,16 @@ on:
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Install & run Gitleaks
-        run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 --output gitleaks
-          chmod +x gitleaks
-          ./gitleaks detect --no-banner --report-path gitleaks-report.sarif || true
+    steps:
+      - uses: actions/checkout@v4
+
+      # Acción oficial (sin parámetros)
+      - uses: gitleaks/gitleaks-action@v2
+        id: gitleaks
+        continue-on-error: true          # no hace fallar el workflow
+
+      # Subir el SARIF que la acción genera automáticamente
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.gitleaks.outputs.sarif }}
