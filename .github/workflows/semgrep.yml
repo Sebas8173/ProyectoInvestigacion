@@ -1,27 +1,31 @@
+# .github/workflows/semgrep.yml  ←  (este archivo está en tu repo)
 name: Semgrep Scan
+
 on:
-  push: {branches: [main]}
-  pull_request: {branches: [main]}
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
+      security-events: write   # permite subir el informe SARIF
 
     steps:
+      # 1) Descarga tu código
       - uses: actions/checkout@v4
 
+      # 2) Ejecuta Semgrep usando las reglas del archivo raíz ./semgrep.yml
       - uses: returntocorp/semgrep-action@v1
         id: semgrep
         with:
           config: |
-            p/secrets
-            p/python
-            p/flask
-            p/security-audit
+            ./semgrep.yml      # ← AQUÍ es donde se referencia tu archivo de reglas
 
+      # 3) Sube el reporte SARIF a la pestaña "Security → Code scanning alerts"
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.semgrep.outputs.sarif }}
