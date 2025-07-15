@@ -1,30 +1,27 @@
 name: Semgrep Scan
-
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push: {branches: [main]}
+  pull_request: {branches: [main]}
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write   # necesario para subir el SARIF
+      security-events: write
 
     steps:
       - uses: actions/checkout@v4
 
-      # Ejecuta Semgrep
       - uses: returntocorp/semgrep-action@v1
-        id: semgrep                        # ← da acceso a outputs
+        id: semgrep
         with:
           config: |
             p/secrets
             p/python
+            p/flask
+            p/security-audit
 
-      # Sube el reporte SARIF a Code scanning
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.semgrep.outputs.sarif }}
