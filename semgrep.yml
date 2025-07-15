@@ -1,0 +1,20 @@
+rules:
+  - id: flask-debug-mode
+    patterns:
+      - pattern: app.run(debug=True)
+    message: Evita ejecutar Flask con debug=True en producción.
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+      technology: flask
+
+  - id: sql-injection
+    patterns:
+      - pattern: cursor.execute("... " + ...)
+    message: Posible vulnerabilidad de inyección SQL
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+      cwe: "CWE-89"
